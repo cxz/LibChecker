@@ -176,17 +176,18 @@ dependencies {
   implementation("com.drakeet.multitype:multitype:4.3.0")
   implementation("com.airbnb.android:lottie:4.0.0")
   implementation("com.jakewharton.timber:timber:4.7.1")
+  implementation("com.jakewharton:process-phoenix:2.1.1")
   implementation("com.jonathanfinerty.once:once:1.3.1")
   implementation("net.dongliu:apk-parser:2.6.10")
   implementation("io.coil-kt:coil:1.3.1")
   implementation("me.zhanghai.android.fastscroll:library:1.1.7")
   implementation("me.zhanghai.android.appiconloader:appiconloader:1.3.1")
   implementation("org.lsposed.hiddenapibypass:hiddenapibypass:2.0")
-  implementation("com.jakewharton:process-phoenix:2.1.1")
 
   //Serialization
-  implementation("com.google.code.gson:gson:2.8.7")
   implementation("com.google.protobuf:protobuf-javalite:$protocVersion")
+  implementation("com.squareup.moshi:moshi:1.12.0")
+  kapt("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
 
   implementation("dev.rikka.rikkax.appcompat:appcompat:1.2.0-rc01")
   implementation("dev.rikka.rikkax.core:core:1.3.2")
@@ -199,7 +200,7 @@ dependencies {
   //Network
   implementation("com.squareup.okhttp3:okhttp:4.9.1")
   implementation("com.squareup.retrofit2:retrofit:2.9.0")
-  implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+  implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
   implementation("com.squareup.okio:okio:2.10.0")
 
   // gRPC

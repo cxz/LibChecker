@@ -19,6 +19,7 @@ import com.absinthe.libchecker.annotation.ACTIVITY
 import com.absinthe.libchecker.annotation.PROVIDER
 import com.absinthe.libchecker.annotation.RECEIVER
 import com.absinthe.libchecker.annotation.SERVICE
+import com.absinthe.libchecker.bean.LibStringItem
 import com.absinthe.libchecker.constant.GlobalValues
 import com.absinthe.libchecker.database.AppItemRepository
 import com.absinthe.libchecker.database.Repositories
@@ -30,7 +31,8 @@ import com.absinthe.libchecker.utils.PackageUtils
 import com.absinthe.libchecker.utils.extensions.getColor
 import com.absinthe.libchecker.viewmodel.GET_INSTALL_APPS_RETRY_PERIOD
 import com.absinthe.libraries.utils.manager.TimeRecorder
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -53,7 +55,13 @@ class ShootService : LifecycleService() {
       setLocale(GlobalValues.locale)
     }
   }
-  private val gson = Gson()
+  private val moshi by lazy { Moshi.Builder().build() }
+  private val stringListAdapter by lazy {
+    moshi.adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
+  }
+  private val libStringItemListAdapter by lazy {
+    moshi.adapter<List<LibStringItem>>(Types.newParameterizedType(List::class.java, LibStringItem::class.java))
+  }
   private val repository = Repositories.lcRepository
   private val listenerList = RemoteCallbackList<OnShootListener>()
 
@@ -183,22 +191,22 @@ class ShootService : LifecycleService() {
               isSystem = (info.flags and ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM,
               abi = PackageUtils.getAbi(info).toShort(),
               targetApi = info.targetSdkVersion.toShort(),
-              nativeLibs = gson.toJson(
+              nativeLibs = libStringItemListAdapter.toJson(
                 PackageUtils.getNativeDirLibs(it)
               ),
-              services = gson.toJson(
+              services = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, SERVICE, false)
               ),
-              activities = gson.toJson(
+              activities = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, ACTIVITY, false)
               ),
-              receivers = gson.toJson(
+              receivers = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, RECEIVER, false)
               ),
-              providers = gson.toJson(
+              providers = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, PROVIDER, false)
               ),
-              permissions = gson.toJson(PackageUtils.getPermissionsList(it.packageName))
+              permissions = stringListAdapter.toJson(PackageUtils.getPermissionsList(it.packageName))
             )
           )
         }
@@ -238,22 +246,22 @@ class ShootService : LifecycleService() {
               isSystem = (info.flags and ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM,
               abi = abiValue.toShort(),
               targetApi = info.targetSdkVersion.toShort(),
-              nativeLibs = gson.toJson(
+              nativeLibs = libStringItemListAdapter.toJson(
                 PackageUtils.getNativeDirLibs(it, PackageUtils.is32bit(abiValue))
               ),
-              services = gson.toJson(
+              services = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, SERVICE, false)
               ),
-              activities = gson.toJson(
+              activities = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, ACTIVITY, false)
               ),
-              receivers = gson.toJson(
+              receivers = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, RECEIVER, false)
               ),
-              providers = gson.toJson(
+              providers = stringListAdapter.toJson(
                 PackageUtils.getComponentStringList(it.packageName, PROVIDER, false)
               ),
-              permissions = gson.toJson(PackageUtils.getPermissionsList(it.packageName))
+              permissions = stringListAdapter.toJson(PackageUtils.getPermissionsList(it.packageName))
             )
           )
         }

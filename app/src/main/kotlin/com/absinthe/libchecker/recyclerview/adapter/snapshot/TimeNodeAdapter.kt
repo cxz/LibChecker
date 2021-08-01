@@ -5,17 +5,20 @@ import com.absinthe.libchecker.database.entity.TimeStampItem
 import com.absinthe.libchecker.view.snapshot.TimeNodeItemView
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import timber.log.Timber
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class TimeNodeAdapter : BaseQuickAdapter<TimeStampItem, BaseViewHolder>(0) {
 
-  private val gson by lazy { Gson() }
+  private val jsonAdapter by lazy {
+    Moshi.Builder().build()
+      .adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
+  }
 
   override fun onCreateDefViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
     return BaseViewHolder(TimeNodeItemView(context))
@@ -25,10 +28,10 @@ class TimeNodeAdapter : BaseQuickAdapter<TimeStampItem, BaseViewHolder>(0) {
     (holder.itemView as TimeNodeItemView).apply {
       name.text = getFormatDateString(item.timestamp)
       try {
-        val list: List<String>? =
-          gson.fromJson(item.topApps, object : TypeToken<List<String>?>() {}.type)
-        adapter.setList(list)
-      } catch (e: JsonSyntaxException) {
+        item.topApps?.let {
+          adapter.setList(jsonAdapter.fromJson(it))
+        }
+      } catch (e: IOException) {
         Timber.e(e)
       }
     }

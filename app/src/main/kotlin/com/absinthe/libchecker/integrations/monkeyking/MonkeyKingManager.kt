@@ -11,7 +11,7 @@ import com.absinthe.libchecker.annotation.RECEIVER
 import com.absinthe.libchecker.annotation.SERVICE
 import com.absinthe.libchecker.utils.PackageUtils
 import com.absinthe.libchecker.utils.showToast
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
 
 const val TYPE_ACTIVITY = "activity"
 const val TYPE_SERVICE = "service"
@@ -24,13 +24,18 @@ private const val FIRST_SUPPORT_VERSION_CODE = 308047
 
 class MonkeyKingManager {
 
+  private val jsonAdapter by lazy {
+    Moshi.Builder().build()
+      .adapter(ShareCmpInfo::class.java)
+  }
+
   fun queryBlockedComponent(context: Context, packageName: String): List<ShareCmpInfo.Component> {
     val contentResolver = context.contentResolver
     val uri = Uri.parse(URI_AUTHORIZATION)
     return try {
       val bundle = contentResolver.call(uri, "cmps", packageName, null)
-      val shareCmpInfoString = bundle?.getString("cmp_list")
-      Gson().fromJson(shareCmpInfoString, ShareCmpInfo::class.java).components
+      val shareCmpInfoString = bundle?.getString("cmp_list")?: return emptyList()
+      jsonAdapter.fromJson(shareCmpInfoString)?.components ?: emptyList()
     } catch (e: Throwable) {
       emptyList()
     }
@@ -59,7 +64,7 @@ class MonkeyKingManager {
       )
     )
     val bundle = bundleOf(
-      "cmp_list" to Gson().toJson(shareCmpInfo)
+      "cmp_list" to jsonAdapter.toJson(shareCmpInfo)
     )
     try {
       context.contentResolver.call(URI_AUTHORIZATION.toUri(), "blocks", packageName, bundle)
